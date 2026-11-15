@@ -78,7 +78,25 @@
 <section class="section" id="routines"><div class="card"><h2>Build a gentle routine</h2><p class="sub">No streaks to break. Check off what you can today.</p><form id="routineForm" class="stack"><input id="routineName" placeholder="Routine step (e.g., 6:00 AM — Morning walk)" required><select id="routineGroup"><option>Morning</option><option>Workday</option><option>Evening</option></select><button class="primary">+ Add routine step</button></form></div><div id="routineGroups" class="grid"></div></section>
 <section class="section" id="habits"><div class="card"><h2>Habit tracker</h2><p class="sub">Tap each day you did the habit. An empty day is just an empty day.</p><form id="habitForm" class="flex"><input id="habitName" placeholder="New habit (e.g., Drink water)" required><button class="primary">Add</button></form></div><div id="habitList"></div></section>
 <section class="section" id="brain"><div class="card"><h2>Brain dump 🧠</h2><p class="sub">No organizing required. Just get it out of your head.</p><textarea id="brainInput" rows="5" placeholder="Ideas, worries, things to remember, random thoughts..."></textarea><div class="actions"><button class="primary" onclick="addNote(false)">Save thought</button><button onclick="brainToTask()">Turn into task</button></div></div><div class="card"><h2>Saved thoughts</h2><div id="notesList"></div></div></section>
-<section class="section" id="settings"><div class="card"><h2>Your data, your choice</h2><p>This free dashboard saves data in this browser's local storage. No account, tracking, or subscription. It does <b>not</b> automatically sync between devices or Google Calendar.</p><div class="actions"><button class="primary" onclick="exportData()">⬇ Export backup (.json)</button><label style="display:inline-flex;align-items:center;background:var(--lav);border-radius:10px;padding:10px;cursor:pointer">⬆ Import backup<input id="importFile" type="file" accept=".json,application/json" style="display:none"></label></div><p class="sub">Export regularly. Import on another device to transfer your data manually. Import replaces current dashboard data.</p></div><div class="card"><h2>Google Calendar</h2><p>Each scheduled event offers an “Add to Google Calendar” link. It opens a prefilled Google event for you to save. Google events won't automatically appear here, and editing either copy won't update the other.</p><a href="https://calendar.google.com" target="_blank" rel="noopener">Go to Google Calendar ↗</a></div><div class="card"><h2>Install / save this dashboard</h2><p>Keep the HTML file somewhere safe. Open it in Chrome or Edge and bookmark it. Your data is tied to the browser and file origin; moving or renaming the file may make previous data inaccessible. Export a backup before moving it.</p><p class="sub">For dependable multi-device syncing and live Google Calendar access, this would need a hosted app with sign-in and Google Calendar API authorization.</p></div></section>
+<section class="section" id="settings"><div class="card" id="cloudPanel">
+<h2>☁️ Softly Cloud — sign in &amp; sync</h2>
+<p class="sub">Sign in on your computer and phone with the same Softly account. Your current browser data stays local until you choose how to begin.</p>
+<div id="cloudStatus" class="planner-tip" role="status" aria-live="polite">Connecting…</div>
+<div id="cloudAuth" class="stack" style="display:none">
+<label>Email<input type="email" id="cloudEmail" autocomplete="email"></label>
+<label>Password<input type="password" id="cloudPassword" autocomplete="current-password"></label>
+<div class="actions"><button class="primary" onclick="softlySignIn()">Sign in</button><button onclick="softlySignUp()">Create account</button></div>
+</div>
+<div id="cloudSignedIn" style="display:none"><p class="sub" id="cloudIdentity"></p><button class="ghost" onclick="softlySignOut()">Sign out</button></div>
+<div id="cloudChoose" style="display:none" class="planner-tip">
+<strong>First, export a JSON backup in Settings below.</strong>
+<p class="sub">Choose which copy should be used first. Do not use both buttons without backups.</p>
+<div class="actions"><button class="primary" onclick="softlyUploadFirst()">Use THIS device's data</button><button onclick="softlyDownloadFirst()">Use CLOUD data on this device</button></div>
+</div>
+<div id="cloudActive" style="display:none" class="stack">
+<p class="sub">Sync is enabled on this device. Changes upload after saving. On another device, tap Refresh from cloud to see changes. Avoid editing both devices simultaneously.</p>
+<div class="actions"><button onclick="softlyPull()">Refresh from cloud</button><button onclick="softlyPush()">Save to cloud now</button><button onclick="softlyStopSync()">Pause syncing</button></div>
+</div></div><div class="card"><h2>Your data, your choice</h2><p>Softly saves a local copy in this browser. After you sign in and enable Softly Cloud, changes can also be saved to your private Supabase record. Google Calendar remains manual.</p><div class="actions"><button class="primary" onclick="exportData()">⬇ Export backup (.json)</button><label style="display:inline-flex;align-items:center;background:var(--lav);border-radius:10px;padding:10px;cursor:pointer">⬆ Import backup<input id="importFile" type="file" accept=".json,application/json" style="display:none"></label></div><p class="sub">Export regularly. Import on another device to transfer your data manually. Import replaces current dashboard data.</p></div><div class="card"><h2>Google Calendar</h2><p>Each scheduled event offers an “Add to Google Calendar” link. It opens a prefilled Google event for you to save. Google events won't automatically appear here, and editing either copy won't update the other.</p><a href="https://calendar.google.com" target="_blank" rel="noopener">Go to Google Calendar ↗</a></div><div class="card"><h2>Install / save this dashboard</h2><p>Keep the HTML file somewhere safe. Open it in Chrome or Edge and bookmark it. Your data is tied to the browser and file origin; moving or renaming the file may make previous data inaccessible. Export a backup before moving it.</p><p class="sub">Softly Cloud provides optional syncing. Live Google Calendar integration is not yet included.</p></div></section>
 </main></div></div><div id="toast" role="status"></div><script>
 const KEY='softly-dashboard-v1';const dateKey=d=>{let y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return `${y}-${m}-${day}`};const today=dateKey(new Date());const defaults=()=>({tasks:[],events:[],notes:[],routines:[{id:1,name:'Take a few deep breaths',group:'Morning',checks:{}},{id:2,name:'Choose my top 3',group:'Morning',checks:{}},{id:3,name:'Take a short movement break',group:'Workday',checks:{}},{id:4,name:'Celebrate one win',group:'Evening',checks:{}}],habits:[{id:5,name:'Move my body',checks:{}},{id:6,name:'Drink water',checks:{}}]});let data;try{data=JSON.parse(localStorage.getItem(KEY))||defaults()}catch{data=defaults()}function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch{toast('Browser storage unavailable. Export a backup instead.')}render()}let nextId=()=>Date.now()+Math.floor(Math.random()*10000);let viewMonth=new Date();viewMonth.setDate(1);let selected=today;function toast(s){let e=document.getElementById('toast');e.textContent=s;e.style.display='block';clearTimeout(window.toastTimeout);window.toastTimeout=setTimeout(()=>e.style.display='none',2600)}function el(tag,text,cls){let n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n}function navigate(page){document.querySelectorAll('.section').forEach(n=>n.classList.toggle('active',n.id===page));document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===page));render();window.scrollTo({top:0,behavior:'smooth'})}document.querySelectorAll('.nav').forEach(b=>b.onclick=()=>navigate(b.dataset.page));document.getElementById('todayLabel').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric'});document.getElementById('greeting').textContent=(new Date().getHours()<12?'Good morning':new Date().getHours()<17?'Good afternoon':'Good evening')+' 💚';document.getElementById('taskDate').value=today;document.getElementById('eventDate').value=today;
 function taskRow(t){let row=el('div',undefined,'task'),cb=document.createElement('input');cb.type='checkbox';cb.checked=!!t.done;cb.onchange=()=>{t.done=cb.checked;save()};row.append(cb);let middle=el('div',undefined,'grow');middle.append(el('div',t.name,t.done?'done':''));middle.append(el('div',t.category+(t.date?' · '+t.date:'')+(t.priority===3?' · ⭐ Top priority':''),'sub'));row.append(middle);let del=el('button','×','ghost');del.title='Delete task';del.onclick=()=>{data.tasks=data.tasks.filter(x=>x.id!==t.id);save()};row.append(del);return row}function renderTasks(){let open=data.tasks.filter(x=>!x.done).sort((a,b)=>b.priority-a.priority||(a.date||'9999').localeCompare(b.date||'9999'));let top=document.getElementById('topTasks');top.replaceChildren();open.slice(0,3).forEach(t=>top.append(taskRow(t)));if(!open.length)top.append(el('p','Nothing urgent here. Add a small first step.','empty'));let done=data.tasks.filter(x=>x.done).length;document.getElementById('taskProgress').style.width=(data.tasks.length?done/data.tasks.length*100:0)+'%';document.getElementById('taskProgressText').textContent=done+' of '+data.tasks.length+' tasks completed';let filter=document.getElementById('taskFilter').value,all=document.getElementById('allTasks');all.replaceChildren();data.tasks.filter(t=>filter==='all'||(filter==='done'?t.done:!t.done)).sort((a,b)=>b.priority-a.priority).forEach(t=>all.append(taskRow(t)));if(!all.children.length)all.append(el('p','No tasks in this view.','empty'));let sel=document.getElementById('focusTask'),value=sel.value;sel.replaceChildren(new Option('Just focus — no task selected',''));open.forEach(t=>sel.add(new Option(t.name,t.id)));sel.value=value;if(sel.selectedIndex<0)sel.selectedIndex=0}document.getElementById('taskForm').onsubmit=e=>{e.preventDefault();data.tasks.push({id:nextId(),name:document.getElementById('taskName').value.trim(),category:document.getElementById('taskCategory').value,date:document.getElementById('taskDate').value,priority:Number(document.getElementById('taskPriority').value),done:false});document.getElementById('taskName').value='';save();toast('Task added 💚')};
@@ -343,4 +361,108 @@ save();alert('Reflection saved. 💚');
 const previous=window.render;window.render=function(){previous();draw()};
 draw();
 })();
-</script></body></html>
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const PROJECT='https://vhgejgujchmaddkkozey.supabase.co';
+const PUBLISHABLE='sb_publishable_g6_eleteg8INfshnuqCdzA_WRe9deTj';
+const ACTIVE_KEY='softly-cloud-active-v1';
+let client=null,user=null,active=false,busy=false,pending=false,timer=null;
+function status(msg){$('cloudStatus').textContent=msg}
+function panels(){
+$('cloudAuth').style.display=client&&!user?'grid':'none';
+$('cloudSignedIn').style.display=user?'block':'none';
+$('cloudChoose').style.display=user&&!active?'block':'none';
+$('cloudActive').style.display=user&&active?'grid':'none';
+$('cloudIdentity').textContent=user?'Signed in: '+user.email:'';
+}
+function valid(x){return x&&typeof x==='object'&&['tasks','events','notes','routines','habits'].every(k=>Array.isArray(x[k]))}
+async function remote(){
+const {data:row,error}=await client.from('user_data').select('dashboard_data').eq('user_id',user.id).maybeSingle();
+if(error)throw Error(error.message);
+return row?.dashboard_data||null;
+}
+async function upload(){
+if(!active||!user||busy){pending=true;return false}
+busy=true;
+try{
+const snapshot=JSON.parse(JSON.stringify(data));
+const {error}=await client.from('user_data').upsert({user_id:user.id,dashboard_data:snapshot,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+if(error)throw Error(error.message);
+status('Saved to cloud ✓ '+new Date().toLocaleTimeString());
+return true;
+}catch(e){status('Cloud save failed: '+e.message+'. Your browser copy remains available.');return false}
+finally{busy=false;if(pending&&active){pending=false;queueUpload()}}
+}
+function queueUpload(){clearTimeout(timer);timer=setTimeout(upload,1000)}
+const originalSave=save;
+save=function(){originalSave();if(active)queueUpload()};
+window.softlySignUp=async()=>{
+if(!client)return;
+const email=$('cloudEmail').value.trim(),password=$('cloudPassword').value;
+if(!email||!password)return status('Enter your email and password.');
+const {data:result,error}=await client.auth.signUp({email,password,options:{emailRedirectTo:location.origin+location.pathname}});
+$('cloudPassword').value='';
+status(error?'Sign-up error: '+error.message:result.session?'Account created. Export a backup before choosing sync.':'Check your email for a confirmation link, then return and sign in.');
+};
+window.softlySignIn=async()=>{
+if(!client)return;
+const {error}=await client.auth.signInWithPassword({email:$('cloudEmail').value.trim(),password:$('cloudPassword').value});
+$('cloudPassword').value='';
+if(error)status('Sign-in error: '+error.message);
+};
+window.softlySignOut=async()=>{
+active=false;localStorage.removeItem(ACTIVE_KEY);clearTimeout(timer);
+if(client)await client.auth.signOut();
+status('Signed out. Your browser data is unchanged.');
+};
+window.softlyUploadFirst=async()=>{
+if(!user)return;
+if(!confirm('Have you exported a JSON backup? This will overwrite any existing CLOUD data with THIS browser data.'))return;
+active=true;localStorage.setItem(ACTIVE_KEY,user.id);panels();
+const ok=await upload();
+if(!ok){active=false;localStorage.removeItem(ACTIVE_KEY);panels()}
+};
+window.softlyDownloadFirst=async()=>{
+if(!user)return;
+try{
+const r=await remote();
+if(!r)return status('No cloud data exists yet. On your original device, choose Use THIS device’s data first.');
+if(!valid(r))throw Error('Cloud data format is not recognized.');
+if(!confirm('Have you exported a JSON backup? Replace ALL dashboard data in THIS browser with cloud data?'))return;
+data=r;originalSave();active=true;localStorage.setItem(ACTIVE_KEY,user.id);panels();status('Cloud data loaded ✓');
+}catch(e){status('Cloud download failed: '+e.message)}
+};
+window.softlyPull=async()=>{
+if(!active||busy||timer)return status('Wait for the current upload to finish, then refresh.');
+try{
+const r=await remote();if(!valid(r))throw Error('No valid cloud data found.');
+if(!confirm('Replace this browser’s data with the latest cloud copy? Unsynced local edits may be lost.'))return;
+data=r;originalSave();status('Refreshed from cloud ✓');
+}catch(e){status('Refresh failed: '+e.message)}
+};
+window.softlyPush=async()=>{clearTimeout(timer);timer=null;await upload()};
+window.softlyStopSync=()=>{active=false;localStorage.removeItem(ACTIVE_KEY);clearTimeout(timer);panels();status('Cloud syncing paused on this device. Local data is unchanged.')};
+async function initialize(){
+if(!window.supabase?.createClient){status('Cloud library could not load. Check your internet connection. Local dashboard still works.');return}
+client=window.supabase.createClient(PROJECT,PUBLISHABLE,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+client.auth.onAuthStateChange((_event,session)=>{
+const next=session?.user||null;
+if(next?.id!==user?.id){
+user=next;active=!!user&&localStorage.getItem(ACTIVE_KEY)===user.id;
+panels();status(user?(active?'Signed in. Cloud sync enabled. Tap Refresh from cloud to get updates from other devices.':'Signed in. Export a backup, then choose which copy to use.'):'Cloud ready. Sign in or create an account.');
+}
+});
+const {data:session,error}=await client.auth.getSession();
+if(error)status('Authentication error: '+error.message);
+user=session?.session?.user||null;
+active=!!user&&localStorage.getItem(ACTIVE_KEY)===user.id;
+panels();
+if(!error)status(user?(active?'Cloud sync enabled. Tap Refresh from cloud to get updates from other devices.':'Signed in. Export a backup, then choose which copy to use.'):'Cloud ready. Create an account or sign in.');
+}
+panels();initialize();
+})();
+</script>
+</body></html>
