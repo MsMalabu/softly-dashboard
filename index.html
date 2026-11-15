@@ -79,7 +79,7 @@
 <section class="section" id="habits"><div class="card"><h2>Habit tracker</h2><p class="sub">Tap each day you did the habit. An empty day is just an empty day.</p><form id="habitForm" class="flex"><input id="habitName" placeholder="New habit (e.g., Drink water)" required><button class="primary">Add</button></form></div><div id="habitList"></div></section>
 <section class="section" id="brain"><div class="card"><h2>Brain dump 🧠</h2><p class="sub">No organizing required. Just get it out of your head.</p><textarea id="brainInput" rows="5" placeholder="Ideas, worries, things to remember, random thoughts..."></textarea><div class="actions"><button class="primary" onclick="addNote(false)">Save thought</button><button onclick="brainToTask()">Turn into task</button></div></div><div class="card"><h2>Saved thoughts</h2><div id="notesList"></div></div></section>
 <section class="section" id="settings"><div class="card" id="cloudPanel">
-<h2>☁️ Softly Cloud — sign in &amp; sync</h2>
+<h2>☁️ Softly Cloud 6.1 — safer sync</h2>
 <p class="sub">Sign in on your computer and phone with the same Softly account. Your current browser data stays local until you choose how to begin.</p>
 <div id="cloudStatus" class="planner-tip" role="status" aria-live="polite">Connecting…</div>
 <div id="cloudAuth" class="stack" style="display:none">
@@ -94,7 +94,7 @@
 <div class="actions"><button class="primary" onclick="softlyUploadFirst()">Use THIS device's data</button><button onclick="softlyDownloadFirst()">Use CLOUD data on this device</button></div>
 </div>
 <div id="cloudActive" style="display:none" class="stack">
-<p class="sub">Sync is enabled on this device. Changes upload after saving. On another device, tap Refresh from cloud to see changes. Avoid editing both devices simultaneously.</p>
+<p class="sub">Sync is enabled. Softly checks for cloud changes when you return to the page and every 30 seconds while it is open. If both devices change the same data, syncing pauses to protect your work. Keep a JSON backup.</p>
 <div class="actions"><button onclick="softlyPull()">Refresh from cloud</button><button onclick="softlyPush()">Save to cloud now</button><button onclick="softlyStopSync()">Pause syncing</button></div>
 </div></div><div class="card"><h2>Your data, your choice</h2><p>Softly saves a local copy in this browser. After you sign in and enable Softly Cloud, changes can also be saved to your private Supabase record. Google Calendar remains manual.</p><div class="actions"><button class="primary" onclick="exportData()">⬇ Export backup (.json)</button><label style="display:inline-flex;align-items:center;background:var(--lav);border-radius:10px;padding:10px;cursor:pointer">⬆ Import backup<input id="importFile" type="file" accept=".json,application/json" style="display:none"></label></div><p class="sub">Export regularly. Import on another device to transfer your data manually. Import replaces current dashboard data.</p></div><div class="card"><h2>Google Calendar</h2><p>Each scheduled event offers an “Add to Google Calendar” link. It opens a prefilled Google event for you to save. Google events won't automatically appear here, and editing either copy won't update the other.</p><a href="https://calendar.google.com" target="_blank" rel="noopener">Go to Google Calendar ↗</a></div><div class="card"><h2>Install / save this dashboard</h2><p>Keep the HTML file somewhere safe. Open it in Chrome or Edge and bookmark it. Your data is tied to the browser and file origin; moving or renaming the file may make previous data inaccessible. Export a backup before moving it.</p><p class="sub">Softly Cloud provides optional syncing. Live Google Calendar integration is not yet included.</p></div></section>
 </main></div></div><div id="toast" role="status"></div><script>
@@ -369,7 +369,11 @@ const $=id=>document.getElementById(id);
 const PROJECT='https://vhgejgujchmaddkkozey.supabase.co';
 const PUBLISHABLE='sb_publishable_g6_eleteg8INfshnuqCdzA_WRe9deTj';
 const ACTIVE_KEY='softly-cloud-active-v1';
-let client=null,user=null,active=false,busy=false,pending=false,timer=null;
+let client=null,user=null,active=false,busy=false,pending=false,timer=null,baseline=null,dirty=false,conflict=false;
+const BASE_KEY='softly-cloud-baseline-v1';
+const signature=x=>JSON.stringify(x);
+const getBaseline=()=>{try{return JSON.parse(localStorage.getItem(BASE_KEY+user.id))}catch{return null}};
+const setBaseline=x=>{baseline=signature(x);localStorage.setItem(BASE_KEY+user.id,JSON.stringify(baseline))};
 function status(msg){$('cloudStatus').textContent=msg}
 function panels(){
 $('cloudAuth').style.display=client&&!user?'grid':'none';
@@ -385,20 +389,28 @@ if(error)throw Error(error.message);
 return row?.dashboard_data||null;
 }
 async function upload(){
-if(!active||!user||busy){pending=true;return false}
+if(!active||!user||conflict)return false;
+if(busy){pending=true;return false}
 busy=true;
 try{
 const snapshot=JSON.parse(JSON.stringify(data));
+const r=await remote();
+if(r&&baseline!==null&&signature(r)!==baseline){
+conflict=true;status('⚠️ Sync paused: another device changed the cloud data. Export a JSON backup, then choose Refresh from cloud to accept the cloud copy. Your local edits are preserved.');return false;
+}
+if(r&&baseline===null){
+conflict=true;status('⚠️ Sync paused: cloud state was not established. Export a backup and use Refresh from cloud to reconcile.');return false;
+}
 const {error}=await client.from('user_data').upsert({user_id:user.id,dashboard_data:snapshot,updated_at:new Date().toISOString()},{onConflict:'user_id'});
 if(error)throw Error(error.message);
-status('Saved to cloud ✓ '+new Date().toLocaleTimeString());
-return true;
-}catch(e){status('Cloud save failed: '+e.message+'. Your browser copy remains available.');return false}
-finally{busy=false;if(pending&&active){pending=false;queueUpload()}}
+setBaseline(snapshot);dirty=signature(data)!==signature(snapshot);
+status('Saved to cloud ✓ '+new Date().toLocaleTimeString());return true;
+}catch(e){status('Cloud save failed: '+e.message+'. Your local data remains available.');return false}
+finally{busy=false;if(pending&&active&&!conflict){pending=false;queueUpload()}}
 }
 function queueUpload(){clearTimeout(timer);timer=setTimeout(upload,1000)}
 const originalSave=save;
-save=function(){originalSave();if(active)queueUpload()};
+save=function(){originalSave();if(active){dirty=true;queueUpload()}};
 window.softlySignUp=async()=>{
 if(!client)return;
 const email=$('cloudEmail').value.trim(),password=$('cloudPassword').value;
@@ -414,7 +426,7 @@ $('cloudPassword').value='';
 if(error)status('Sign-in error: '+error.message);
 };
 window.softlySignOut=async()=>{
-active=false;localStorage.removeItem(ACTIVE_KEY);clearTimeout(timer);
+active=false;localStorage.removeItem(ACTIVE_KEY);clearTimeout(timer);conflict=false;dirty=false;
 if(client)await client.auth.signOut();
 status('Signed out. Your browser data is unchanged.');
 };
@@ -422,6 +434,7 @@ window.softlyUploadFirst=async()=>{
 if(!user)return;
 if(!confirm('Have you exported a JSON backup? This will overwrite any existing CLOUD data with THIS browser data.'))return;
 active=true;localStorage.setItem(ACTIVE_KEY,user.id);panels();
+try{const existing=await remote();if(existing)setBaseline(existing);else baseline=null}catch(e){status('Cloud check failed: '+e.message);active=false;panels();return}
 const ok=await upload();
 if(!ok){active=false;localStorage.removeItem(ACTIVE_KEY);panels()}
 };
@@ -432,15 +445,16 @@ const r=await remote();
 if(!r)return status('No cloud data exists yet. On your original device, choose Use THIS device’s data first.');
 if(!valid(r))throw Error('Cloud data format is not recognized.');
 if(!confirm('Have you exported a JSON backup? Replace ALL dashboard data in THIS browser with cloud data?'))return;
-data=r;originalSave();active=true;localStorage.setItem(ACTIVE_KEY,user.id);panels();status('Cloud data loaded ✓');
+data=r;originalSave();setBaseline(r);dirty=false;conflict=false;active=true;localStorage.setItem(ACTIVE_KEY,user.id);panels();status('Cloud data loaded ✓');
 }catch(e){status('Cloud download failed: '+e.message)}
 };
 window.softlyPull=async()=>{
-if(!active||busy||timer)return status('Wait for the current upload to finish, then refresh.');
+if(!active||busy)return status('Wait for the current upload to finish, then refresh.');
+clearTimeout(timer);timer=null;
 try{
 const r=await remote();if(!valid(r))throw Error('No valid cloud data found.');
 if(!confirm('Replace this browser’s data with the latest cloud copy? Unsynced local edits may be lost.'))return;
-data=r;originalSave();status('Refreshed from cloud ✓');
+data=r;originalSave();setBaseline(r);dirty=false;conflict=false;status('Refreshed from cloud ✓');
 }catch(e){status('Refresh failed: '+e.message)}
 };
 window.softlyPush=async()=>{clearTimeout(timer);timer=null;await upload()};
@@ -451,17 +465,31 @@ client=window.supabase.createClient(PROJECT,PUBLISHABLE,{auth:{persistSession:tr
 client.auth.onAuthStateChange((_event,session)=>{
 const next=session?.user||null;
 if(next?.id!==user?.id){
-user=next;active=!!user&&localStorage.getItem(ACTIVE_KEY)===user.id;
+user=next;active=!!user&&localStorage.getItem(ACTIVE_KEY)===user.id;baseline=user?getBaseline():null;dirty=false;conflict=false;
 panels();status(user?(active?'Signed in. Cloud sync enabled. Tap Refresh from cloud to get updates from other devices.':'Signed in. Export a backup, then choose which copy to use.'):'Cloud ready. Sign in or create an account.');
 }
 });
 const {data:session,error}=await client.auth.getSession();
 if(error)status('Authentication error: '+error.message);
 user=session?.session?.user||null;
-active=!!user&&localStorage.getItem(ACTIVE_KEY)===user.id;
+active=!!user&&localStorage.getItem(ACTIVE_KEY)===user.id;baseline=user?getBaseline():null;
 panels();
 if(!error)status(user?(active?'Cloud sync enabled. Tap Refresh from cloud to get updates from other devices.':'Signed in. Export a backup, then choose which copy to use.'):'Cloud ready. Create an account or sign in.');
 }
+async function checkForUpdates(){
+if(!active||!user||busy||dirty||timer||conflict||document.visibilityState==='hidden')return;
+try{
+const r=await remote();if(!valid(r))return;
+if(baseline===null){if(signature(data)===signature(r))setBaseline(r);else{conflict=true;status('⚠️ Cloud and local data differ. Export a backup and choose Refresh from cloud.')}return}
+if(signature(r)!==baseline){
+if(signature(data)!==baseline){conflict=true;status('⚠️ Sync conflict detected. Export a backup before choosing Refresh from cloud.');return}
+data=r;originalSave();setBaseline(r);status('Updated automatically from cloud ✓ '+new Date().toLocaleTimeString());
+}
+}catch(e){status('Cloud check failed: '+e.message)}
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkForUpdates()});
+window.addEventListener('focus',checkForUpdates);
+setInterval(checkForUpdates,30000);
 panels();initialize();
 })();
 </script>
