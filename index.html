@@ -1,0 +1,346 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Softly — My Focus Space</title><style>
+:root{--bg:#f3f8f3;--card:#fff;--ink:#263b30;--muted:#687c70;--lav:#dceee0;--purple:#357653;--mint:#dceee8;--peach:#fae8df;--line:#dce8dd}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer;border:0;border-radius:11px;padding:10px 14px;background:var(--lav);color:var(--ink)}button.primary{background:var(--purple);color:#fff}button.ghost{background:transparent}button:hover{filter:brightness(.97)}input,textarea,select{border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);padding:10px;width:100%}textarea{resize:vertical}header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:24px 0}h1{font-size:29px;margin:0}h2{font-size:18px;margin:0 0 12px}h3{font-size:15px;margin:12px 0 8px}.sub{color:var(--muted);font-size:13px}.wrap{max-width:1250px;padding:0 22px 45px;margin:auto}.layout{display:grid;grid-template-columns:230px 1fr;gap:22px}.sidebar,.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 4px 24px #315e400d}.sidebar{padding:15px;align-self:start;position:sticky;top:15px}.nav{display:block;width:100%;text-align:left;margin:5px 0;background:transparent}.nav.active{background:var(--lav);font-weight:700;color:#245b3b}.main{min-width:0}.section{display:none}.section.active{display:block}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.card{padding:20px;margin-bottom:16px}.wide{grid-column:1/-1}.flex{display:flex;gap:9px;align-items:center}.between{justify-content:space-between}.stack{display:grid;gap:9px}.pill{font-size:12px;padding:4px 9px;border-radius:99px;background:var(--mint)}.task{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.task:last-child{border:0}.task input[type=checkbox]{width:18px;height:18px;accent-color:var(--purple)}.task .done{text-decoration:line-through;color:var(--muted)}.task .grow{flex:1;min-width:0;overflow-wrap:anywhere}.small{font-size:12px}.muted{color:var(--muted)}.two{display:grid;grid-template-columns:1fr 1fr;gap:9px}.three{display:grid;grid-template-columns:2fr 1fr 1fr;gap:9px}.timer{font-size:64px;font-weight:700;letter-spacing:2px;text-align:center;color:#326d4a;font-variant-numeric:tabular-nums}.center{text-align:center}.progress{height:9px;background:#e9f1e9;border-radius:10px;overflow:hidden}.progress>div{height:100%;background:#88b89a;width:0;transition:width .2s}.calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.day{min-height:79px;padding:7px;border:1px solid var(--line);border-radius:10px;background:white;text-align:left;overflow:hidden}.day.today{border:2px solid var(--purple)}.day.selected{background:var(--lav)}.day .dots{font-size:10px;color:#43855e;overflow-wrap:anywhere}.weekday{text-align:center;color:var(--muted);font-size:12px}.event{border-left:4px solid #88b89a;padding:9px;background:#f1f8f1;border-radius:7px;margin:6px 0}.routine{padding:10px;border-radius:10px;background:#f7fbf7}.habits{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.habitdot{width:100%;aspect-ratio:1;border-radius:7px;background:#e9f1e9;padding:0}.habitdot.on{background:#b9ddcf}.note{padding:12px;background:#f7fbf7;border-radius:11px;white-space:pre-wrap;overflow-wrap:anywhere}.empty{color:var(--muted);font-size:13px;padding:10px 0}.tag{font-size:11px;background:#eaf3eb;padding:3px 6px;border-radius:5px}.banner{background:linear-gradient(100deg,#e5f3e7,#e5f3ed);border-radius:17px;padding:22px;margin-bottom:16px}.banner p{margin:4px 0 0}.actions{display:flex;flex-wrap:wrap;gap:8px}.hide{display:none!important}a{color:#356f4d}#toast{position:fixed;bottom:20px;right:20px;background:#2a4936;color:white;border-radius:10px;padding:12px;display:none;z-index:10}@media(max-width:780px){.layout{display:block}.sidebar{position:static;display:flex;overflow:auto;margin-bottom:16px;gap:4px;padding:8px}.nav{white-space:nowrap;width:auto}.grid{grid-template-columns:1fr}.wide{grid-column:auto}.wrap{padding:0 12px 28px}.card{padding:15px}.three{grid-template-columns:1fr 1fr}.three input:first-child{grid-column:1/-1}.day{min-height:64px;padding:4px;font-size:12px}.timer{font-size:50px}header{padding:16px 0}h1{font-size:23px}}
+</style>
+<style>
+.planner-row{display:grid;grid-template-columns:78px 1fr;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);align-items:start}
+.planner-time{font-size:12px;color:var(--muted);padding-top:7px}
+.planner-block{padding:12px;border-radius:11px;background:#eaf5ec;border-left:4px solid #56946c}
+.planner-block.work{background:#edf3f7;border-color:#7897a7}
+.planner-block.care{background:#f1f5e7;border-color:#a2b87b}
+.planner-block.art{background:#f9f0e8;border-color:#c69c75}
+.planner-block.study{background:#f0edf8;border-color:#9e91bd}
+.planner-block .sub{margin-top:3px}
+.planner-template{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.planner-tip{background:#f2f8f2;border:1px dashed #a7c7af;padding:12px;border-radius:12px}
+@media(max-width:500px){.planner-row{grid-template-columns:54px 1fr;gap:7px}}
+</style>
+<style>
+.bp-modes{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0}.bp-mode{flex:1;min-width:115px}
+.bp-mode.chosen{background:#357653;color:white;border-color:#357653}
+.bp-goal{padding:13px;border:1px solid var(--line);border-radius:12px;margin:9px 0}
+.bp-goal p{margin:5px 0}.bp-progress{height:8px;background:#e4ece6;border-radius:20px;overflow:hidden}
+.bp-progress>div{height:100%;background:#659f76}
+.bp-check{display:flex;align-items:center;gap:8px;margin:8px 0}
+</style><style>
+.wk-day{border:1px solid var(--line);border-radius:12px;padding:12px;margin:9px 0}
+.wk-entry{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line)}
+.wk-entry:last-child{border-bottom:0}
+.wk-entry span{font-size:13px}
+.wk-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.wk-row>*{flex:1;min-width:115px}
+.wk-small{font-size:12px;color:var(--muted)}
+</style></head><body><div class="wrap"><header><div><h1>☁️ Softly <span style="font-weight:400">— My Focus Space</span></h1><div class="sub" id="todayLabel"></div></div><div class="flex"><span class="pill">One thing at a time ✨</span></div></header><div class="layout"><nav class="sidebar" aria-label="Sections"><button class="nav active" data-page="today">🏡 Today</button><button class="nav" data-page="tasks">✓ Tasks</button><button class="nav" data-page="review">💚 Weekly Review</button><button class="nav" data-page="weekly">📅 Weekly Rhythm</button><button class="nav" data-page="blueprint">🧭 Life Blueprint</button><button class="nav" data-page="planner">🕒 Day Planner</button><button class="nav" data-page="calendar">🗓 Calendar</button><button class="nav" data-page="focus">⏳ Focus</button><button class="nav" data-page="routines">🌿 Routines</button><button class="nav" data-page="habits">💚 Habits</button><button class="nav" data-page="brain">🧠 Brain Dump</button><button class="nav" data-page="settings">⚙️ Settings & Backup</button></nav><main class="main">
+<section class="section active" id="today"><div class="banner"><h2 id="greeting">Welcome back 💚</h2><p>Progress counts, even when it is tiny. You can restart at any moment.</p></div><div class="grid"><div class="card"><div class="flex between"><h2>My top 3 today</h2><button onclick="navigate('tasks')">Manage</button></div><div id="topTasks"></div><div class="progress"><div id="taskProgress"></div></div><div class="sub" id="taskProgressText"></div></div><div class="card"><h2>Coming up</h2><div id="upcoming"></div><button onclick="navigate('calendar')">Open schedule</button></div><div class="card"><h2>Quick brain dump</h2><textarea id="quickBrain" rows="3" placeholder="Get that thought out of your head..."></textarea><div class="actions"><button class="primary" onclick="addNote(true)">Save thought</button><button onclick="navigate('brain')">See all thoughts</button></div></div><div class="card"><h2>Gentle reset 🌷</h2><p class="sub">Overwhelmed? Choose one small next step.</p><button class="primary" onclick="resetMoment()">Help me restart</button><p id="resetAdvice" class="sub"></p></div></div></section>
+<section class="section" id="tasks"><div class="card"><h2>Tasks & priorities</h2><p class="sub">Capture tasks here. Set a date and priority; only your top three appear on Today.</p><form id="taskForm" class="stack"><input id="taskName" placeholder="What's one thing you need to do?" required><div class="three"><select id="taskCategory"><option>Personal</option><option>College</option><option>Work</option><option>Pigmented Soul</option><option>Health & wellness</option></select><input id="taskDate" type="date"><select id="taskPriority"><option value="2">Important</option><option value="1">Normal</option><option value="3">Top priority</option></select></div><button class="primary">+ Add task</button></form></div><div class="card"><div class="flex between"><h2>All tasks</h2><select id="taskFilter" style="width:auto" onchange="render()"><option value="open">Open</option><option value="all">All</option><option value="done">Completed</option></select></div><div id="allTasks"></div></div></section>
+
+<section class="section" id="review">
+<div class="banner"><h2>💚 My Weekly Reset</h2><p>Notice what matters, celebrate your effort, and make next week lighter. No guilt or grades.</p></div>
+<div class="grid">
+<div class="card wide"><h2>Life balance at a glance</h2><p class="sub">A reflection on activities you've scheduled this week — not a score for how well you lived.</p><div id="revBalance"></div></div>
+<div class="card"><h2>Unfinished tasks</h2><p class="sub">Choose what to carry into next week. Nothing moves without your permission.</p><div id="revTasks"></div><div class="actions"><button class="primary" onclick="revRollover()">Move selected to next Monday</button></div></div>
+<div class="card"><h2>Weekly reflection</h2><form id="revReflection" class="stack"><label>What went well?</label><textarea id="revGood" rows="2" placeholder="A tiny win counts..."></textarea><label>What felt difficult?</label><textarea id="revHard" rows="2" placeholder="No judgment."></textarea><label>What would make next week kinder?</label><textarea id="revKind" rows="2" placeholder="One helpful adjustment..."></textarea><button class="primary">Save reflection</button></form></div>
+<div class="card wide"><h2>My saved reflections</h2><div id="revHistory"></div></div>
+</div></section><section class="section" id="weekly">
+<div class="banner"><h2>📅 My Weekly Rhythm</h2><p>Consistency with variety. Build a flexible week around work, your wellbeing, college, creativity, and fun.</p></div>
+<div class="grid">
+<div class="card"><h2>My weekly foundations</h2><p class="sub">Starting with your confirmed 6:00 AM wake-up goal and 10:00 AM–6:30 PM work schedule. Workdays are editable; class days are not assumed.</p>
+<label for="wkWake">Wake-up goal</label><input type="time" id="wkWake" value="06:00">
+<label for="wkWorkStart">Work starts</label><input type="time" id="wkWorkStart" value="10:00">
+<label for="wkWorkEnd">Work ends</label><input type="time" id="wkWorkEnd" value="18:30">
+<p class="sub">Which days do you work?</p><div id="wkWorkDays" class="wk-row"></div>
+<button class="primary" onclick="wkSaveSettings()">Save my foundations</button>
+</div>
+<div class="card"><h2>Choose your rhythm</h2><p class="sub">These are editable suggestions, not a rigid routine.</p>
+<label for="wkWeek">Week beginning Monday</label><input type="date" id="wkWeek">
+<label for="wkEnergy">Planning pace</label><select id="wkEnergy"><option value="balanced">Balanced — essentials + joy</option><option value="gentle">Gentle — fewer blocks, more space</option><option value="active">Active — extra creative / learning time</option></select>
+<div class="actions"><button onclick="wkPreview()">Refresh preview</button><button class="primary" onclick="wkApply()">Add my week to calendar</button></div>
+<p class="sub">Preview before adding. The app won't erase your existing calendar events. You can remove suggested blocks individually afterward.</p>
+</div>
+<div class="card wide"><h2>My suggested week</h2><div class="planner-tip">💚 A schedule is a guide, not a test. Work and rest matter; joy belongs on the calendar too. Your morning movement is a flexible 15-minute starting point.</div><div id="wkPreviewList"></div></div>
+<div class="card wide"><h2>Make it yours</h2><p class="sub">Add a recurring weekly activity, including classes if you have them. These are only added to the calendar when you choose to apply the week.</p>
+<form id="wkCustomForm" class="stack"><div class="wk-row"><input id="wkCustomName" placeholder="e.g. College class or date night" required><select id="wkCustomDay"><option value="0">Monday</option><option value="1">Tuesday</option><option value="2">Wednesday</option><option value="3">Thursday</option><option value="4">Friday</option><option value="5">Saturday</option><option value="6">Sunday</option></select><input type="time" id="wkCustomStart" value="19:00" required><input type="time" id="wkCustomEnd" value="20:00" required></div><button class="primary">Add weekly activity</button></form><div id="wkCustomList"></div></div>
+</div></section><section class="section" id="blueprint">
+<div class="banner"><h2>🧭 My Life Blueprint</h2><p>Make progress toward a life you love. Your goals, your pace, your version of success.</p></div>
+<div class="grid">
+<div class="card wide"><h2>How much energy do you have today?</h2><p class="sub">Choose a mode whenever you want. No guilt, no broken streaks.</p><div class="bp-modes" id="bpModes"></div><div class="planner-tip" id="bpModeAdvice"></div><div class="actions" style="margin-top:12px"><button onclick="bpPick()">🎲 Surprise me with a small win</button><button onclick="bpReset()">🌿 Help, I'm overwhelmed</button></div><p id="bpSuggestion" aria-live="polite"></p></div>
+<div class="card"><h2>My weekly intentions</h2><p class="sub">Three gentle anchors for the week. Edit them whenever life changes.</p><div id="bpWeekly"></div><button onclick="bpNewWeek()">↻ Start a fresh week</button></div>
+<div class="card"><h2>Celebrate progress</h2><p class="sub">A small step counts, even if you didn't finish everything.</p><form id="bpWinForm" class="stack"><input id="bpWinInput" placeholder="One thing I'm proud of..." required><button class="primary">Save my win 💚</button></form><div id="bpWins"></div></div>
+<div class="card wide"><div class="flex between"><h2>My life areas</h2><span class="sub">Optional goals, not obligations</span></div><div id="bpGoals"></div><form id="bpGoalForm" class="stack"><div class="two"><select id="bpArea"><option>Personal & Joy</option><option>Career & Money</option><option>College & Tech</option><option>Mind & Self-Care</option><option>Pigmented Soul</option><option>Movement & Wellness</option></select><input id="bpGoalName" placeholder="Add a goal or milestone" required></div><button class="primary">Add goal</button></form></div>
+</div></section><section class="section" id="planner">
+<div class="banner"><h2>🌿 My gentle day planner</h2><p>A flexible plan, not a strict rulebook. Leave room for joy, rest, and the unexpected.</p></div>
+<div class="grid">
+<div class="card"><h2>Plan a day</h2><label class="sub" for="plannerDate">Choose your day</label><input type="date" id="plannerDate"><div class="actions" style="margin-top:12px"><button onclick="plannerShift(-1)">← Previous</button><button onclick="plannerShift(1)">Next →</button><button onclick="plannerToday()">Today</button></div><h3>Suggested starting points</h3><p class="sub">These are ideas, not scheduled commitments. Click one to prefill the form, then choose your time.</p><div class="planner-template" id="plannerTemplates"></div></div>
+<div class="card"><h2>Add a time block</h2><form id="plannerForm" class="stack"><input id="plannerTitle" placeholder="What would you like to make time for?" required><div class="two"><input type="time" id="plannerStart" value="09:00" required><input type="time" id="plannerEnd" value="09:30" required></div><select id="plannerKind"><option value="personal">Personal & life</option><option value="work">Work</option><option value="study">College & career</option><option value="art">Pigmented Soul & creativity</option><option value="care">Wellness & self-care</option></select><button class="primary">Add to this day</button></form><p class="sub">Time blocks also appear in your monthly calendar. Nothing is automatically added to Google Calendar.</p></div>
+<div class="card wide"><div class="flex between"><h2 id="plannerHeading">Today's flow</h2><button onclick="navigate('calendar')">Monthly calendar</button></div><div class="planner-tip">💚 <strong>Flexible is productive.</strong> Try one important task, one care moment, and one enjoyable activity. You can move or delete blocks when life changes.</div><div id="plannerTimeline" style="margin-top:14px"></div></div>
+</div></section>
+<section class="section" id="calendar"><div class="card"><div class="flex between"><h2 id="monthTitle"></h2><div class="flex"><button onclick="changeMonth(-1)" aria-label="Previous month">‹</button><button onclick="changeMonth(1)" aria-label="Next month">›</button></div></div><div class="calendar" id="calendarGrid"></div></div><div class="grid"><div class="card"><h2 id="selectedDateLabel">Schedule</h2><div id="dayEvents"></div></div><div class="card"><h2>Add a time block</h2><form id="eventForm" class="stack"><input id="eventName" placeholder="Appointment, study time, walk..." required><input id="eventDate" type="date" required><div class="two"><input id="eventStart" type="time" value="09:00" required><input id="eventEnd" type="time" value="09:30" required></div><button class="primary">Add to my schedule</button></form><p class="sub">Events here stay in this dashboard. Use “Add to Google Calendar” on each event to create a separate Google event.</p><a href="https://calendar.google.com/calendar/u/0/r" target="_blank" rel="noopener">Open Google Calendar ↗</a></div></div></section>
+<section class="section" id="focus"><div class="card center"><h2>Focus on one thing ⏳</h2><p class="sub">Choose a task, set a gentle timer, and begin.</p><select id="focusTask" style="max-width:430px"></select><div class="timer" id="timerDisplay">25:00</div><div class="actions" style="justify-content:center"><button onclick="setTimer(5)">5 min</button><button onclick="setTimer(15)">15 min</button><button onclick="setTimer(25)">25 min</button><button onclick="setTimer(45)">45 min</button></div><div class="actions" style="justify-content:center;margin-top:14px"><button class="primary" id="timerToggle" onclick="toggleTimer()">Start focus</button><button onclick="resetTimer()">Reset</button></div><p id="timerStatus" class="sub">A tiny start is still a start.</p></div><div class="card"><h2>Break ideas</h2><p>💧 Drink water · 🧘 Stretch · 🌤 Look outside · 🚶 Walk for two minutes</p><p class="sub">Keep this tab open for the timer. Sound and background alerts aren't guaranteed if the browser suspends the tab.</p></div></section>
+<section class="section" id="routines"><div class="card"><h2>Build a gentle routine</h2><p class="sub">No streaks to break. Check off what you can today.</p><form id="routineForm" class="stack"><input id="routineName" placeholder="Routine step (e.g., 6:00 AM — Morning walk)" required><select id="routineGroup"><option>Morning</option><option>Workday</option><option>Evening</option></select><button class="primary">+ Add routine step</button></form></div><div id="routineGroups" class="grid"></div></section>
+<section class="section" id="habits"><div class="card"><h2>Habit tracker</h2><p class="sub">Tap each day you did the habit. An empty day is just an empty day.</p><form id="habitForm" class="flex"><input id="habitName" placeholder="New habit (e.g., Drink water)" required><button class="primary">Add</button></form></div><div id="habitList"></div></section>
+<section class="section" id="brain"><div class="card"><h2>Brain dump 🧠</h2><p class="sub">No organizing required. Just get it out of your head.</p><textarea id="brainInput" rows="5" placeholder="Ideas, worries, things to remember, random thoughts..."></textarea><div class="actions"><button class="primary" onclick="addNote(false)">Save thought</button><button onclick="brainToTask()">Turn into task</button></div></div><div class="card"><h2>Saved thoughts</h2><div id="notesList"></div></div></section>
+<section class="section" id="settings"><div class="card"><h2>Your data, your choice</h2><p>This free dashboard saves data in this browser's local storage. No account, tracking, or subscription. It does <b>not</b> automatically sync between devices or Google Calendar.</p><div class="actions"><button class="primary" onclick="exportData()">⬇ Export backup (.json)</button><label style="display:inline-flex;align-items:center;background:var(--lav);border-radius:10px;padding:10px;cursor:pointer">⬆ Import backup<input id="importFile" type="file" accept=".json,application/json" style="display:none"></label></div><p class="sub">Export regularly. Import on another device to transfer your data manually. Import replaces current dashboard data.</p></div><div class="card"><h2>Google Calendar</h2><p>Each scheduled event offers an “Add to Google Calendar” link. It opens a prefilled Google event for you to save. Google events won't automatically appear here, and editing either copy won't update the other.</p><a href="https://calendar.google.com" target="_blank" rel="noopener">Go to Google Calendar ↗</a></div><div class="card"><h2>Install / save this dashboard</h2><p>Keep the HTML file somewhere safe. Open it in Chrome or Edge and bookmark it. Your data is tied to the browser and file origin; moving or renaming the file may make previous data inaccessible. Export a backup before moving it.</p><p class="sub">For dependable multi-device syncing and live Google Calendar access, this would need a hosted app with sign-in and Google Calendar API authorization.</p></div></section>
+</main></div></div><div id="toast" role="status"></div><script>
+const KEY='softly-dashboard-v1';const dateKey=d=>{let y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return `${y}-${m}-${day}`};const today=dateKey(new Date());const defaults=()=>({tasks:[],events:[],notes:[],routines:[{id:1,name:'Take a few deep breaths',group:'Morning',checks:{}},{id:2,name:'Choose my top 3',group:'Morning',checks:{}},{id:3,name:'Take a short movement break',group:'Workday',checks:{}},{id:4,name:'Celebrate one win',group:'Evening',checks:{}}],habits:[{id:5,name:'Move my body',checks:{}},{id:6,name:'Drink water',checks:{}}]});let data;try{data=JSON.parse(localStorage.getItem(KEY))||defaults()}catch{data=defaults()}function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch{toast('Browser storage unavailable. Export a backup instead.')}render()}let nextId=()=>Date.now()+Math.floor(Math.random()*10000);let viewMonth=new Date();viewMonth.setDate(1);let selected=today;function toast(s){let e=document.getElementById('toast');e.textContent=s;e.style.display='block';clearTimeout(window.toastTimeout);window.toastTimeout=setTimeout(()=>e.style.display='none',2600)}function el(tag,text,cls){let n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n}function navigate(page){document.querySelectorAll('.section').forEach(n=>n.classList.toggle('active',n.id===page));document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===page));render();window.scrollTo({top:0,behavior:'smooth'})}document.querySelectorAll('.nav').forEach(b=>b.onclick=()=>navigate(b.dataset.page));document.getElementById('todayLabel').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric'});document.getElementById('greeting').textContent=(new Date().getHours()<12?'Good morning':new Date().getHours()<17?'Good afternoon':'Good evening')+' 💚';document.getElementById('taskDate').value=today;document.getElementById('eventDate').value=today;
+function taskRow(t){let row=el('div',undefined,'task'),cb=document.createElement('input');cb.type='checkbox';cb.checked=!!t.done;cb.onchange=()=>{t.done=cb.checked;save()};row.append(cb);let middle=el('div',undefined,'grow');middle.append(el('div',t.name,t.done?'done':''));middle.append(el('div',t.category+(t.date?' · '+t.date:'')+(t.priority===3?' · ⭐ Top priority':''),'sub'));row.append(middle);let del=el('button','×','ghost');del.title='Delete task';del.onclick=()=>{data.tasks=data.tasks.filter(x=>x.id!==t.id);save()};row.append(del);return row}function renderTasks(){let open=data.tasks.filter(x=>!x.done).sort((a,b)=>b.priority-a.priority||(a.date||'9999').localeCompare(b.date||'9999'));let top=document.getElementById('topTasks');top.replaceChildren();open.slice(0,3).forEach(t=>top.append(taskRow(t)));if(!open.length)top.append(el('p','Nothing urgent here. Add a small first step.','empty'));let done=data.tasks.filter(x=>x.done).length;document.getElementById('taskProgress').style.width=(data.tasks.length?done/data.tasks.length*100:0)+'%';document.getElementById('taskProgressText').textContent=done+' of '+data.tasks.length+' tasks completed';let filter=document.getElementById('taskFilter').value,all=document.getElementById('allTasks');all.replaceChildren();data.tasks.filter(t=>filter==='all'||(filter==='done'?t.done:!t.done)).sort((a,b)=>b.priority-a.priority).forEach(t=>all.append(taskRow(t)));if(!all.children.length)all.append(el('p','No tasks in this view.','empty'));let sel=document.getElementById('focusTask'),value=sel.value;sel.replaceChildren(new Option('Just focus — no task selected',''));open.forEach(t=>sel.add(new Option(t.name,t.id)));sel.value=value;if(sel.selectedIndex<0)sel.selectedIndex=0}document.getElementById('taskForm').onsubmit=e=>{e.preventDefault();data.tasks.push({id:nextId(),name:document.getElementById('taskName').value.trim(),category:document.getElementById('taskCategory').value,date:document.getElementById('taskDate').value,priority:Number(document.getElementById('taskPriority').value),done:false});document.getElementById('taskName').value='';save();toast('Task added 💚')};
+function changeMonth(n){viewMonth.setMonth(viewMonth.getMonth()+n);renderCalendar()}function renderCalendar(){document.getElementById('monthTitle').textContent=viewMonth.toLocaleDateString(undefined,{month:'long',year:'numeric'});let grid=document.getElementById('calendarGrid');grid.replaceChildren();['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(w=>grid.append(el('div',w,'weekday')));let y=viewMonth.getFullYear(),m=viewMonth.getMonth(),offset=new Date(y,m,1).getDay(),count=new Date(y,m+1,0).getDate();for(let i=0;i<offset;i++)grid.append(el('div'));for(let d=1;d<=count;d++){let date=dateKey(new Date(y,m,d)),events=data.events.filter(x=>x.date===date),b=el('button',undefined,'day'+(date===today?' today':'')+(date===selected?' selected':''));b.append(el('div',String(d)));events.slice(0,2).forEach(e=>b.append(el('div',e.start+' '+e.name,'dots')));if(events.length>2)b.append(el('div','+'+(events.length-2)+' more','dots'));b.onclick=()=>{selected=date;document.getElementById('eventDate').value=date;renderCalendar()};grid.append(b)}document.getElementById('selectedDateLabel').textContent='Schedule · '+selected;let events=document.getElementById('dayEvents');events.replaceChildren();data.events.filter(e=>e.date===selected).sort((a,b)=>a.start.localeCompare(b.start)).forEach(e=>{let card=el('div',undefined,'event');card.append(el('strong',e.name),el('div',e.start+' – '+e.end,'sub'));let buttons=el('div',undefined,'actions');let google=el('a','Add to Google Calendar ↗');let compact=s=>s.replace(/[-:]/g,'');google.href='https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(e.name)+'&dates='+compact(e.date)+'T'+compact(e.start)+'00/'+compact(e.date)+'T'+compact(e.end)+'00';google.target='_blank';google.rel='noopener';buttons.append(google);let del=el('button','Delete','ghost');del.onclick=()=>{data.events=data.events.filter(x=>x.id!==e.id);save()};buttons.append(del);card.append(buttons);events.append(card)});if(!events.children.length)events.append(el('p','A little breathing room in your day.','empty'));let upcoming=document.getElementById('upcoming');upcoming.replaceChildren();data.events.filter(e=>e.date>=today).sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start)).slice(0,3).forEach(e=>upcoming.append(el('p',e.date+' · '+e.start+' — '+e.name)));if(!upcoming.children.length)upcoming.append(el('p','No upcoming time blocks yet.','empty'))}document.getElementById('eventForm').onsubmit=e=>{e.preventDefault();let start=document.getElementById('eventStart').value,end=document.getElementById('eventEnd').value;if(end<=start){toast('End time must be after start time');return}data.events.push({id:nextId(),name:document.getElementById('eventName').value.trim(),date:document.getElementById('eventDate').value,start,end});selected=document.getElementById('eventDate').value;viewMonth=new Date(selected+'T12:00:00');viewMonth.setDate(1);document.getElementById('eventName').value='';save();toast('Time block added')};
+function renderRoutines(){let parent=document.getElementById('routineGroups');parent.replaceChildren();['Morning','Workday','Evening'].forEach(g=>{let card=el('div',undefined,'card');card.append(el('h2',g));data.routines.filter(r=>r.group===g).forEach(r=>{let row=el('div',undefined,'task');let cb=document.createElement('input');cb.type='checkbox';cb.checked=!!r.checks[today];cb.onchange=()=>{r.checks[today]=cb.checked;save()};row.append(cb,el('span',r.name,'grow'));let del=el('button','×','ghost');del.onclick=()=>{data.routines=data.routines.filter(x=>x.id!==r.id);save()};row.append(del);card.append(row)});parent.append(card)})}document.getElementById('routineForm').onsubmit=e=>{e.preventDefault();data.routines.push({id:nextId(),name:document.getElementById('routineName').value.trim(),group:document.getElementById('routineGroup').value,checks:{}});document.getElementById('routineName').value='';save()};function renderHabits(){let parent=document.getElementById('habitList');parent.replaceChildren();let days=Array.from({length:7},(_,i)=>{let d=new Date();d.setDate(d.getDate()-6+i);return d});data.habits.forEach(h=>{let card=el('div',undefined,'card');let title=el('div',undefined,'flex between');title.append(el('h2',h.name));let del=el('button','Remove','ghost');del.onclick=()=>{data.habits=data.habits.filter(x=>x.id!==h.id);save()};title.append(del);card.append(title);let row=el('div',undefined,'habits');days.forEach(d=>{let k=dateKey(d),cell=el('div',undefined,'center');cell.append(el('div',d.toLocaleDateString(undefined,{weekday:'short'}),'small muted'));let b=el('button',h.checks[k]?'✓':'', 'habitdot'+(h.checks[k]?' on':''));b.title=k;b.setAttribute('aria-label',h.name+' on '+k);b.onclick=()=>{h.checks[k]=!h.checks[k];save()};cell.append(b);row.append(cell)});card.append(row);parent.append(card)})}document.getElementById('habitForm').onsubmit=e=>{e.preventDefault();data.habits.push({id:nextId(),name:document.getElementById('habitName').value.trim(),checks:{}});document.getElementById('habitName').value='';save()};
+function addNote(quick){let field=document.getElementById(quick?'quickBrain':'brainInput');let s=field.value.trim();if(!s)return;data.notes.unshift({id:nextId(),text:s,created:new Date().toLocaleString()});field.value='';save();toast('Thought saved')};function brainToTask(){let field=document.getElementById('brainInput'),s=field.value.trim();if(!s)return;data.tasks.push({id:nextId(),name:s,category:'Personal',date:'',priority:1,done:false});field.value='';save();toast('Added to tasks')};function renderNotes(){let parent=document.getElementById('notesList');parent.replaceChildren();data.notes.forEach(n=>{let card=el('div',undefined,'note');card.append(el('div',n.text),el('div',n.created,'sub'));let actions=el('div',undefined,'actions');let convert=el('button','Make task');convert.onclick=()=>{data.tasks.push({id:nextId(),name:n.text,category:'Personal',date:'',priority:1,done:false});save();toast('Added to tasks')};let del=el('button','Delete','ghost');del.onclick=()=>{data.notes=data.notes.filter(x=>x.id!==n.id);save()};actions.append(convert,del);card.append(actions);parent.append(card)});if(!parent.children.length)parent.append(el('p','Your mind has some space to breathe.','empty'))}function resetMoment(){let steps=['Take one slow breath. Now choose the smallest possible next action.','Drink a little water, then spend just two minutes on one task.','You do not have to catch up on everything. Pick one thing that matters now.','Stand up, stretch your shoulders, and come back to one tiny step.'];document.getElementById('resetAdvice').textContent=steps[Math.floor(Math.random()*steps.length)]}
+let timerLength=25*60,remaining=timerLength,deadline=null,interval=null;function formatTime(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}function timerPaint(){document.getElementById('timerDisplay').textContent=formatTime(remaining)}function setTimer(n){pauseTimer();timerLength=n*60;remaining=timerLength;timerPaint()}function pauseTimer(){if(deadline){remaining=Math.max(0,Math.ceil((deadline-Date.now())/1000));deadline=null}clearInterval(interval);interval=null;document.getElementById('timerToggle').textContent='Start focus';timerPaint()}function toggleTimer(){if(deadline){pauseTimer();return}deadline=Date.now()+remaining*1000;document.getElementById('timerToggle').textContent='Pause';document.getElementById('timerStatus').textContent='One thing at a time. You are doing it.';interval=setInterval(()=>{remaining=Math.max(0,Math.ceil((deadline-Date.now())/1000));timerPaint();if(remaining===0){pauseTimer();document.getElementById('timerStatus').textContent='Focus session complete! Take a gentle break 💚';toast('Focus session complete 💚')}},250)}function resetTimer(){pauseTimer();remaining=timerLength;timerPaint()}
+function exportData(){let blob=new Blob([JSON.stringify({app:'softly-dashboard-v1',data,exported:new Date().toISOString()},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='softly-backup-'+today+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000)}document.getElementById('importFile').onchange=async e=>{let f=e.target.files[0];if(!f)return;try{let parsed=JSON.parse(await f.text());if(parsed.app!=='softly-dashboard-v1'||!parsed.data||!['tasks','events','notes','routines','habits'].every(k=>Array.isArray(parsed.data[k])))throw Error('Invalid backup');if(!confirm('Replace all current dashboard data with this backup?'))return;data=parsed.data;save();toast('Backup imported')}catch(err){toast('Could not import: '+err.message)}e.target.value=''};function render(){renderTasks();renderCalendar();renderRoutines();renderHabits();renderNotes()}render();
+</script>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const templates=[
+ ['🚶 Gentle movement','Morning walk','care',15],
+ ['💧 Self-care','Water, stretch or quiet break','care',15],
+ ['🧘 Mind reset','Journal, prayer or meditation','care',15],
+ ['💼 Work','Work focus block','work',45],
+ ['📚 College','Assignment or study session','study',30],
+ ['💻 Tech career','UX/UI or coding practice','study',25],
+ ['🎨 Art','Pigmented Soul creative time','art',45],
+ ['🌸 Enjoy life','Fun, connection or downtime','personal',30],
+ ['🧹 Home reset','Quick tidy-up','personal',15]
+];
+function localKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function parseDay(s){return new Date(s+'T12:00:00')}
+function plusMinutes(time,n){let [h,m]=time.split(':').map(Number);return String(Math.floor((h*60+m+n)/60)%24).padStart(2,'0')+':'+String((h*60+m+n)%60).padStart(2,'0')}
+const date=$('plannerDate');date.value=localKey(new Date());
+const holder=$('plannerTemplates');
+templates.forEach(([label,name,kind,mins])=>{
+const b=document.createElement('button');b.textContent=label;b.type='button';b.onclick=()=>{
+$('plannerTitle').value=name;$('plannerKind').value=kind;$('plannerEnd').value=plusMinutes($('plannerStart').value||'09:00',mins);
+$('plannerTitle').focus();
+};holder.append(b);
+});
+function draw(){
+let day=date.value||localKey(new Date()),list=$('plannerTimeline');list.replaceChildren();
+$('plannerHeading').textContent='Your flow · '+parseDay(day).toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+const events=(data.events||[]).filter(e=>e.date===day).sort((a,b)=>a.start.localeCompare(b.start));
+if(!events.length){let p=document.createElement('p');p.className='empty';p.textContent='A fresh page. Choose one small thing to begin with. 💚';list.append(p);return}
+events.forEach(e=>{
+let row=document.createElement('div');row.className='planner-row';
+let time=document.createElement('div');time.className='planner-time';time.textContent=e.start+'–'+e.end;
+let block=document.createElement('div');block.className='planner-block '+(e.kind||'personal');
+let strong=document.createElement('strong');strong.textContent=e.name;
+let actions=document.createElement('div');actions.className='actions';actions.style.marginTop='8px';
+let move=document.createElement('button');move.textContent='Move / edit';move.onclick=()=>{
+$('plannerTitle').value=e.name;$('plannerStart').value=e.start;$('plannerEnd').value=e.end;$('plannerKind').value=e.kind||'personal';
+$('plannerForm').dataset.edit=e.id;$('plannerForm').querySelector('button.primary').textContent='Save changes';
+$('plannerTitle').focus();
+};
+let del=document.createElement('button');del.textContent='Remove';del.className='ghost';del.onclick=()=>{data.events=data.events.filter(x=>String(x.id)!==String(e.id));save();draw()};
+actions.append(move,del);block.append(strong,actions);row.append(time,block);list.append(row);
+});
+}
+$('plannerForm').addEventListener('submit',e=>{
+e.preventDefault();
+const name=$('plannerTitle').value.trim(),start=$('plannerStart').value,end=$('plannerEnd').value,kind=$('plannerKind').value;
+if(!name||end<=start){alert('Please enter a title and an end time after the start time.');return}
+let edit=$('plannerForm').dataset.edit;
+if(edit){let old=data.events.find(x=>String(x.id)===String(edit));if(old)Object.assign(old,{name,start,end,date:date.value,kind});delete $('plannerForm').dataset.edit}
+else data.events.push({id:nextId(),name,date:date.value,start,end,kind});
+$('plannerTitle').value='';$('plannerForm').querySelector('button.primary').textContent='Add to this day';
+save();draw();
+});
+date.addEventListener('change',draw);
+window.plannerShift=function(n){let d=parseDay(date.value);d.setDate(d.getDate()+n);date.value=localKey(d);draw()};
+window.plannerToday=function(){date.value=localKey(new Date());draw()};
+const oldRender=window.render;
+window.render=function(){oldRender();draw()};
+draw();
+})();
+</script>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const defaults=[
+['Career & Money','Explore my next technology career step'],
+['College & Tech','Make progress on one course assignment'],
+['Mind & Self-Care','Protect time for my emotional wellbeing'],
+['Pigmented Soul','Create something for the joy of art'],
+['Movement & Wellness','Keep movement gentle and consistent'],
+['Personal & Joy','Plan something I genuinely look forward to']
+];
+function init(){
+if(!data.blueprint || typeof data.blueprint!=='object') data.blueprint={};
+const b=data.blueprint;
+if(!Array.isArray(b.goals))b.goals=defaults.map((x,i)=>({id:100000+i,area:x[0],name:x[1],steps:0,done:false}));
+if(!Array.isArray(b.wins))b.wins=[];
+if(!Array.isArray(b.weekly))b.weekly=['One important priority','One act of care','One moment of joy'].map(name=>({name,done:false}));
+if(!b.modes||typeof b.modes!=='object')b.modes={};
+return b;
+}
+const modes={
+full:{name:'☀️ Full energy',advice:'Choose one focused goal, one self-care moment, and one fun thing. Extra energy is a bonus, not a requirement.',ideas:['Spend 25 minutes on coding or UX','Create art for 30 minutes','Take a comfortable walk','Plan a fun outing']},
+regular:{name:'🌤️ Regular day',advice:'Keep your essentials, choose one meaningful step, and leave some room to breathe.',ideas:['Work on one assignment for 15 minutes','Do a 10-minute tidy','Journal for 5 minutes','Sketch one new art idea']},
+low:{name:'☁️ Low energy',advice:'Today can be simple. Care for yourself, take one tiny step if possible, and rest without needing to earn it.',ideas:['Drink water and sit somewhere comfortable','Take three slow breaths','Open the assignment without pressure','Enjoy five minutes of music']}
+};
+function selectedMode(){return init().modes[dateKey(new Date())]||'regular'}
+function draw(){
+const b=init(),m=selectedMode(),buttons=$('bpModes');buttons.replaceChildren();
+Object.entries(modes).forEach(([key,mode])=>{const btn=el('button',mode.name,'bp-mode'+(key===m?' chosen':''));btn.onclick=()=>{b.modes[dateKey(new Date())]=key;save()};buttons.append(btn)});
+$('bpModeAdvice').textContent=modes[m].advice;
+const weekly=$('bpWeekly');weekly.replaceChildren();
+b.weekly.forEach((w,i)=>{const row=el('label',undefined,'bp-check'),check=document.createElement('input');check.type='checkbox';check.checked=!!w.done;check.onchange=()=>{w.done=check.checked;save()};const input=document.createElement('input');input.value=w.name;input.setAttribute('aria-label','Weekly intention '+(i+1));input.onchange=()=>{w.name=input.value;save()};row.append(check,input);weekly.append(row)});
+const goals=$('bpGoals');goals.replaceChildren();
+b.goals.forEach(g=>{const card=el('div',undefined,'bp-goal');const head=el('div',undefined,'flex between'),name=el('strong',g.name),del=el('button','Remove','ghost');del.onclick=()=>{b.goals=b.goals.filter(x=>x.id!==g.id);save()};head.append(name,del);card.append(head,el('p',g.area,'sub'));
+const row=el('div',undefined,'actions');const plus=el('button','+ Small step');plus.onclick=()=>{g.steps=Math.min(10,(g.steps||0)+1);save()};const minus=el('button','Undo step','ghost');minus.onclick=()=>{g.steps=Math.max(0,(g.steps||0)-1);save()};const finish=el('button',g.done?'✓ Milestone reached':'Mark milestone reached');finish.onclick=()=>{g.done=!g.done;save()};row.append(plus,minus,finish);
+const track=el('div',undefined,'bp-progress'),bar=document.createElement('div');bar.style.width=(g.done?100:Math.min(90,(g.steps||0)*10))+'%';track.append(bar);
+card.append(track,el('p',(g.steps||0)+' small steps recorded'+(g.done?' · milestone reached!':''),'sub'),row);goals.append(card)});
+const wins=$('bpWins');wins.replaceChildren();b.wins.slice(0,8).forEach(w=>wins.append(el('p','💚 '+w.text+' · '+w.date,'sub')));
+}
+window.bpPick=function(){const ideas=modes[selectedMode()].ideas;$('bpSuggestion').textContent='✨ Try this: '+ideas[Math.floor(Math.random()*ideas.length)]};
+window.bpReset=function(){$('bpSuggestion').textContent='🌿 You can begin again right now. Take one breath, get comfortable, and choose just one tiny next step.'};
+window.bpNewWeek=function(){if(confirm('Reset the three weekly checkmarks? Your goals and wins will stay.')){init().weekly.forEach(x=>x.done=false);save()}};
+$('bpWinForm').onsubmit=e=>{e.preventDefault();let value=$('bpWinInput').value.trim();if(!value)return;init().wins.unshift({text:value,date:dateKey(new Date())});$('bpWinInput').value='';save()};
+$('bpGoalForm').onsubmit=e=>{e.preventDefault();let name=$('bpGoalName').value.trim();if(!name)return;init().goals.push({id:nextId(),area:$('bpArea').value,name,steps:0,done:false});$('bpGoalName').value='';save()};
+const prior=window.render;window.render=function(){prior();draw()};
+draw();
+})();
+</script><script>
+(function(){
+const $=id=>document.getElementById(id);
+const names=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const iso=d=>dateKey(d);
+function monday(d){let x=new Date(d.getFullYear(),d.getMonth(),d.getDate(),12);x.setDate(x.getDate()-(x.getDay()+6)%7);return x}
+function settings(){
+if(!data.weeklyRhythm||typeof data.weeklyRhythm!=='object')data.weeklyRhythm={};
+let w=data.weeklyRhythm;
+if(!w.workdays)w.workdays=[0,1,2,3,4];
+if(!w.wake)w.wake='06:00';
+if(!w.workStart)w.workStart='10:00';
+if(!w.workEnd)w.workEnd='18:30';
+if(!Array.isArray(w.custom))w.custom=[];
+return w;
+}
+const startMonday=monday(new Date());$('wkWeek').value=iso(startMonday);
+const w=settings();$('wkWake').value=w.wake;$('wkWorkStart').value=w.workStart;$('wkWorkEnd').value=w.workEnd;
+function dayChecks(){
+const root=$('wkWorkDays');root.replaceChildren();
+names.forEach((n,i)=>{let lab=document.createElement('label');lab.className='bp-check';let c=document.createElement('input');c.type='checkbox';c.value=i;c.checked=w.workdays.includes(i);lab.append(c,document.createTextNode(n.slice(0,3)));root.append(lab)});
+}
+window.wkSaveSettings=function(){
+const a=$('wkWorkStart').value,b=$('wkWorkEnd').value;
+if(!a||!b||b<=a){alert('Please use valid work hours, with the end after the start.');return}
+w.wake=$('wkWake').value;w.workStart=a;w.workEnd=b;w.workdays=[...$('wkWorkDays input:checked')].map(x=>Number(x.value));save();wkPreview();
+};
+function dateAt(i){const d=new Date(($('wkWeek').value||iso(startMonday))+'T12:00:00');d.setDate(d.getDate()+i);return iso(d)}
+function shift(time,n){let [h,m]=time.split(':').map(Number),t=h*60+m+n;return String(Math.floor(t/60)%24).padStart(2,'0')+':'+String(t%60).padStart(2,'0')}
+function add(items,day,start,end,name,kind){if(start&&end&&start<end)items.push({day,date:dateAt(day),start,end,name,kind})}
+function plan(){
+const out=[],pace=$('wkEnergy').value;
+for(let i=0;i<7;i++){
+let work=w.workdays.includes(i);
+add(out,i,w.wake,shift(w.wake,15),'Gentle wake-up & get ready','care');
+add(out,i,shift(w.wake,15),shift(w.wake,30),'Optional easy walk / movement','care');
+if(work){
+add(out,i,w.workStart,w.workEnd,'Work (adjust breaks and meetings as needed)','work');
+add(out,i,'18:45','19:15','Dinner & decompression','care');
+if(pace!=='gentle'){
+let options=[['19:30','20:00','College / tech career focus','study'],['19:30','20:00','Pigmented Soul creative time','art'],['19:30','20:00','Connection or personal joy','personal'],['19:30','20:00','College / tech career focus','study'],['19:30','20:00','Fun or open evening','personal']];
+let [a,b,c,k]=options[i%5];add(out,i,a,b,c,k)
+}
+if(pace==='active')add(out,i,'20:15','20:35','Optional hobby or reflection','personal');
+}else{
+add(out,i,'10:00','10:30','Slow start / personal care','care');
+if(pace!=='gentle')add(out,i,'11:00','11:45',i===5?'Pigmented Soul creative play':'College or personal project','art');
+add(out,i,'14:00','15:00',i===5?'Explore, connect or have fun':'Free time, relationships or rest','personal');
+}
+add(out,i,'21:00','21:15','Wind-down ritual','care');
+}
+w.custom.forEach(c=>add(out,Number(c.day),c.start,c.end,c.name,'personal'));
+return out.sort((a,b)=>a.day-b.day||a.start.localeCompare(b.start));
+}
+function overlaps(a,b){return a.start<b.end&&b.start<a.end}
+function renderPreview(){
+const root=$('wkPreviewList');root.replaceChildren();const blocks=plan();
+for(let i=0;i<7;i++){
+let card=document.createElement('div');card.className='wk-day';
+let heading=document.createElement('strong');heading.textContent=names[i]+' · '+dateAt(i);card.append(heading);
+const events=blocks.filter(x=>x.day===i);
+events.forEach(e=>{
+let line=document.createElement('div');line.className='wk-entry';
+let label=document.createElement('span');label.textContent=e.start+'–'+e.end+'  '+e.name;
+let btn=document.createElement('button');btn.textContent='Add only this';btn.onclick=()=>apply([e]);line.append(label,btn);card.append(line);
+});root.append(card)
+}
+const custom=$('wkCustomList');custom.replaceChildren();
+w.custom.forEach(c=>{let line=document.createElement('div');line.className='wk-entry';let t=document.createElement('span');t.textContent=names[c.day]+' · '+c.start+'–'+c.end+' · '+c.name;let del=document.createElement('button');del.textContent='Remove';del.onclick=()=>{w.custom=w.custom.filter(x=>x.id!==c.id);save()};line.append(t,del);custom.append(line)})
+}
+function apply(blocks){
+let added=0,skipped=0,conflicts=0;
+for(const b of blocks){
+const same=data.events.filter(x=>x.date===b.date);
+if(same.some(x=>x.name===b.name&&x.start===b.start&&x.end===b.end)){skipped++;continue}
+if(same.some(x=>overlaps(x,b))){conflicts++;continue}
+data.events.push({id:nextId(),name:b.name,date:b.date,start:b.start,end:b.end,kind:b.kind});added++
+}
+save();alert(added+' time blocks added. '+skipped+' duplicates and '+conflicts+' scheduling conflicts skipped. Review your calendar to adjust anything.');
+}
+window.wkApply=function(){const all=plan();if(confirm('Add '+all.length+' suggested blocks to the selected week? Existing calendar events are preserved, and overlapping blocks will be skipped.'))apply(all)};
+window.wkPreview=renderPreview;
+$('wkCustomForm').onsubmit=e=>{
+e.preventDefault();const name=$('wkCustomName').value.trim(),start=$('wkCustomStart').value,end=$('wkCustomEnd').value;
+if(!name||end<=start){alert('Enter an activity and an end time later than its start.');return}
+w.custom.push({id:nextId(),name,day:Number($('wkCustomDay').value),start,end});
+$('wkCustomName').value='';save();
+};
+$('wkWeek').onchange=()=>{const d=new Date($('wkWeek').value+'T12:00:00');if(!Number.isNaN(d.getTime()))$('wkWeek').value=iso(monday(d));renderPreview()};
+$('wkEnergy').onchange=renderPreview;
+const previous=window.render;window.render=function(){previous();renderPreview()};
+dayChecks();renderPreview();
+})();
+</script><script>
+(function(){
+const $=id=>document.getElementById(id);
+const areas=[
+['💼 Work','work', '#7897a7'],
+['📚 College & career','study','#9e91bd'],
+['🎨 Art & creativity','art','#c69c75'],
+['🌿 Wellness & care','care','#85a881'],
+['🌸 Personal & joy','personal','#c18ca7']
+];
+function monday(d){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate(),12);x.setDate(x.getDate()-(x.getDay()+6)%7);return x}
+function addDays(d,n){let x=new Date(d);x.setDate(x.getDate()+n);return x}
+function init(){if(!data.weeklyReview||typeof data.weeklyReview!=='object')data.weeklyReview={};if(!Array.isArray(data.weeklyReview.entries))data.weeklyReview.entries=[];return data.weeklyReview}
+function draw(){
+const start=monday(new Date()),end=addDays(start,7),startKey=dateKey(start),endKey=dateKey(end);
+const events=data.events.filter(e=>e.date>=startKey&&e.date<endKey);
+const balance=$('revBalance');balance.replaceChildren();
+areas.forEach(([name,kind,color])=>{
+const count=events.filter(e=>(e.kind||'personal')===kind).length;
+const row=document.createElement('div');row.style.margin='12px 0';
+row.append(el('div',name+' · '+count+' planned block'+(count===1?'':'s'),'sub'));
+const track=document.createElement('div');track.className='bp-progress';track.style.marginTop='6px';
+const fill=document.createElement('div');fill.style.width=(events.length?100*count/events.length:0)+'%';fill.style.background=color;track.append(fill);row.append(track);balance.append(row);
+});
+if(!events.length)balance.append(el('p','No blocks planned this week yet. You can start with one thing that matters.','sub'));
+const tasks=$('revTasks');tasks.replaceChildren();
+const overdue=data.tasks.filter(t=>!t.done&&t.date&&t.date<endKey);
+if(!overdue.length)tasks.append(el('p','Nothing needs carrying forward right now.','sub'));
+overdue.forEach(t=>{const lab=document.createElement('label');lab.className='bp-check';const c=document.createElement('input');c.type='checkbox';c.dataset.taskid=String(t.id);const txt=document.createElement('span');txt.textContent=t.name+' · '+t.date;lab.append(c,txt);tasks.append(lab)});
+const history=$('revHistory');history.replaceChildren();
+init().entries.slice(0,8).forEach(e=>{const card=document.createElement('div');card.className='bp-goal';card.append(el('strong','Week of '+e.week));[['A win',e.good],['A challenge',e.hard],['A kinder next step',e.kind]].forEach(([label,v])=>{if(v)card.append(el('p',label+': '+v))});history.append(card)});
+if(!init().entries.length)history.append(el('p','Your reflections will appear here.','sub'));
+}
+window.revRollover=function(){
+const ids=[...$('revTasks input:checked')].map(e=>e.dataset.taskid);
+if(!ids.length){alert('Choose at least one unfinished task first.');return}
+const target=dateKey(addDays(monday(new Date()),7));
+if(!confirm('Move '+ids.length+' selected task(s) to '+target+'?'))return;
+data.tasks.filter(t=>ids.includes(String(t.id))).forEach(t=>t.date=target);
+save();alert('Selected tasks moved to next Monday. 💚');
+};
+$('revReflection').onsubmit=e=>{
+e.preventDefault();const good=$('revGood').value.trim(),hard=$('revHard').value.trim(),kind=$('revKind').value.trim();
+if(!good&&!hard&&!kind){alert('Write at least one reflection.');return}
+const week=dateKey(monday(new Date())),entries=init().entries;
+const previous=entries.find(e=>e.week===week);
+if(previous)Object.assign(previous,{good,hard,kind});else entries.unshift({week,good,hard,kind});
+save();alert('Reflection saved. 💚');
+};
+const previous=window.render;window.render=function(){previous();draw()};
+draw();
+})();
+</script></body></html>
